@@ -100,6 +100,53 @@ paths:
           description: '{string} delete success!'
         "403":
           description: objectId is empty
+  /unit/:
+    get:
+      tags:
+      - unit
+      description: get top100 Unit
+      operationId: UnitController.Get100
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.Unit'
+    post:
+      tags:
+      - unit
+      description: create Unit
+      operationId: UnitController.CreateUser
+      parameters:
+      - in: body
+        name: body
+        description: body for unit content
+        required: true
+        schema:
+          $ref: '#/definitions/models.Unit'
+      responses:
+        "200":
+          description: '{int} models.Unit.Id'
+        "403":
+          description: body is empty
+  /unit/{id}:
+    get:
+      tags:
+      - unit
+      description: get unit by id
+      operationId: UnitController.Get
+      parameters:
+      - in: path
+        name: id
+        description: The key for staticblock
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.Unit'
+        "403":
+          description: :id is empty
   /user/:
     get:
       tags:
@@ -243,6 +290,20 @@ definitions:
         type: string
       Gender:
         type: string
+  models.Unit:
+    title: Unit
+    type: object
+    properties:
+      Key:
+        type: string
+      KeySize:
+        type: integer
+        format: int64
+      Value:
+        type: string
+      ValueSize:
+        type: integer
+        format: int64
   models.User:
     title: User
     type: object
@@ -262,3 +323,6 @@ tags:
 - name: user
   description: |
     Operations about Users
+- name: unit
+  description: |
+    Operations about Unit

@@ -179,9 +179,28 @@ func SaveToDisk(b *BTree, filename string) (int, error){
 	return length, err
 }
 
+//判断文件或文件夹是否存在
+func Exists(path string) bool {
+	_, err := os.Stat(path)    //os.Stat获取文件信息
+	if err != nil {
+		if os.IsExist(err) {
+			return true
+		}
+		return false
+	}
+	return true
+}
+
 func ReadBTreeFile(filename string) (*BTree, error) {
 	filedir := path.Join("data", filename+".binary")
-	fp, _ := os.Open(filedir)
+	if ok := Exists(filedir); !ok {
+		return &BTree{}, nil
+	}
+	fp, err := os.Open(filedir)
+	if err != nil {
+		logs.Error("open file error", err)
+		return nil, err
+	}
 	defer fp.Close()
 
 	stat, err := fp.Stat()

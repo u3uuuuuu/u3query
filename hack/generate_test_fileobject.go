@@ -18,6 +18,8 @@ import (
 	"unsafe"
 )
 
+const SplitLength = models.SplitLength
+
 var UnitList = make([]models.Unit, 0)
 
 func unit2Buffer(unit *models.Unit, buffer *bytes.Buffer) {
@@ -69,7 +71,10 @@ func UnitWrite(unit *models.Unit, fp *os.File) (int64, error) {
 func UnitRead(fp *os.File, offset int64) (int64, *models.Unit, error){
 	unitKeySize := make([]byte, unsafe.Sizeof(int(0)))
 	unitValueSize := make([]byte, unsafe.Sizeof(int(0)))
-	n1, _ := fp.ReadAt(unitKeySize, offset)
+	n1, err := fp.ReadAt(unitKeySize, offset)
+	if err != nil {
+		return 0, nil, err
+	}
 	unitKey := make([]byte, BytesToInt(unitKeySize))
 	n2, _ := fp.ReadAt(unitKey, offset+int64(n1))
 	n3, _ := fp.ReadAt(unitValueSize, offset+int64(n1+n2))
@@ -116,6 +121,8 @@ func randomUnit() (unit *models.Unit) {
 //生成测试用数据文件
 func GenerateTestDataFile() error {
 	os.Remove(path.Join("tests", "test1.binary"))
+	os.RemoveAll("data")
+	os.Mkdir("data", 0666)
 
 	fp, err := os.OpenFile(path.Join("tests", "test1.binary"), syscall.O_RDWR|syscall.O_APPEND|syscall.O_CREAT, 0666)
 	if err != nil {
@@ -178,25 +185,28 @@ func GenerateBtree() error {
 	for {
 		//每次读取十万个
 		testFile := path.Join("tests", "test1.binary")
-		units, off, err := ReadFile(testFile, 100000, offset)
+		units, off, err := ReadFile(testFile, SplitLength, offset)
 		if err != nil {
 			return err
 		}
 		offset += off
 
 		//读取units，然后生成b+树，并持久化
-		storagefilename := strconv.Itoa(primaryKey)+"-"+strconv.Itoa(primaryKey+10000)
-		btree := tree.BTree{}
-		for u := range *units {
+		storagefilename := strconv.Itoa(primaryKey)+"-"+strconv.Itoa(primaryKey+SplitLength)
+		btree := tree.NewBTree()
+		for _, u := range *units {
 			btree.Insert(primaryKey, u)
 			primaryKey++
 		}
-		_, err = tree.SaveToDisk(&btree, storagefilename)
+		_, err = tree.SaveToDisk(btree, storagefilename)
+		if models.CacheBt.MaxPrimary < primaryKey {
+			models.CacheBt.MaxPrimary = primaryKey
+		}
 		if err != nil {
 			return err
 		}
-
-		if len(*units) < 100000 {
+		models.CacheBt.Put(storagefilename, btree)
+		if len(*units) < SplitLength {
 			break
 		}
 	}

@@ -52,6 +52,33 @@ func init() {
             Filters: nil,
             Params: nil})
 
+    beego.GlobalControllerRouter["u3.com/u3query/controllers:UnitController"] = append(beego.GlobalControllerRouter["u3.com/u3query/controllers:UnitController"],
+        beego.ControllerComments{
+            Method: "Post",
+            Router: "/",
+            AllowHTTPMethods: []string{"post"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["u3.com/u3query/controllers:UnitController"] = append(beego.GlobalControllerRouter["u3.com/u3query/controllers:UnitController"],
+        beego.ControllerComments{
+            Method: "GetAll",
+            Router: "/",
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["u3.com/u3query/controllers:UnitController"] = append(beego.GlobalControllerRouter["u3.com/u3query/controllers:UnitController"],
+        beego.ControllerComments{
+            Method: "Get",
+            Router: "/:id",
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
     beego.GlobalControllerRouter["u3.com/u3query/controllers:UserController"] = append(beego.GlobalControllerRouter["u3.com/u3query/controllers:UserController"],
         beego.ControllerComments{
             Method: "Post",
